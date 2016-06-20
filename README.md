@@ -10,6 +10,9 @@ This project allows the use of the [Apache Tinkerpop](http://tinkerpop.apache.or
 
 ### Create a Vertex
 
+To create a Vertex in the current `graph` instance use the [Graph.addVertex()](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Graph.html#addVertex-java.lang.Object...-).
+
 ```java
+  // create a vertex in current graph
   Vertex vertex = graph.addVertex();
 ```
