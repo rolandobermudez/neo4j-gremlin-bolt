@@ -10,9 +10,25 @@ This project allows the use of the [Apache Tinkerpop](http://tinkerpop.apache.or
 
 ### Create a Vertex
 
-To create a Vertex in the current `graph` instance use the [Graph.addVertex()](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Graph.html#addVertex-java.lang.Object...-).
+Create a new [Vertex](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Vertex.html) in the current `graph` call the [Graph.addVertex()](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Graph.html#addVertex-java.lang.Object...-) method.
 
 ```java
   // create a vertex in current graph
   Vertex vertex = graph.addVertex();
+```
+
+Create a new [Vertex](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Vertex.html) in the current `graph` with some property values: 
+
+```java
+  // create a vertex in current graph with property values
+  Vertex vertex = graph.addVertex("name", "John", "age", 50);
+```
+
+Create a new [Vertex](http://tinkerpop.apache.org/javadocs/current/core/org/apache/tinkerpop/gremlin/structure/Vertex.html) in the current `graph` with a Label: 
+
+```java
+  // create a vertex in current graph with label
+  Vertex vertex1 = graph.addVertex("Person");
+  // create another vertex in current graph with label
+  Vertex vertex2 = graph.addVertex(T.label, "Company");
 ```
