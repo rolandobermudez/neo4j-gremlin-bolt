@@ -25,6 +25,10 @@ import org.neo4j.driver.v1.Statement;
 
 import java.util.Map;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 abstract class Neo4JElement implements Element {
 
     public abstract Map<String, Object> statementParameters();
@@ -34,6 +38,8 @@ abstract class Neo4JElement implements Element {
     public abstract Statement updateStatement();
 
     public abstract Statement deleteStatement();
+
+    public abstract boolean isDirty();
 
     @Override
     public boolean equals(final Object object) {

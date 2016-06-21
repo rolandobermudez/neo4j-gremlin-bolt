@@ -24,6 +24,10 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.FeatureDescriptor;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public final class Neo4JGraphFeatures implements Graph.Features {
 
     private static class Neo4JGraphGraphFeatures implements GraphFeatures {

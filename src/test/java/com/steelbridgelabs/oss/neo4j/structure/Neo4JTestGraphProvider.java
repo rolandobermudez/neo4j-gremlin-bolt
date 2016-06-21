@@ -38,6 +38,10 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public class Neo4JTestGraphProvider extends AbstractGraphProvider {
 
     private static final Set<Class> implementations = new HashSet<Class>() {{

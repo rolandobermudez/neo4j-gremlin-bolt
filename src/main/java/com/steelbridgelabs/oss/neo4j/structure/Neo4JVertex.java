@@ -52,6 +52,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * @author Rogelio J. Baucells
+ */
 public class Neo4JVertex extends Neo4JElement implements Vertex {
 
     private class Neo4JVertexProperty<T> implements VertexProperty<T> {
@@ -164,6 +167,7 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
     private SortedSet<String> labels;
     private boolean outEdgesLoaded = false;
     private boolean inEdgesLoaded = false;
+    private boolean dirty = false;
 
     Neo4JVertex(Graph graph, Neo4JSession session, Neo4JElementIdProvider propertyIdProvider, String idFieldName, Object id, Collection<String> labels) {
         Objects.requireNonNull(graph, "graph cannot be null");
@@ -232,6 +236,11 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
 
     public Set<String> labels() {
         return Collections.unmodifiableSortedSet(labels);
+    }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
     }
 
     @Override
@@ -483,8 +492,12 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
                     cardinalities.put(name, VertexProperty.Cardinality.list);
                 }
                 // add value to list, this will always call dirty method in session
-                if (list.add(property))
+                if (list.add(property)) {
+                    // notify session
                     session.dirtyVertex(this);
+                    // update flag
+                    dirty = true;
+                }
                 break;
             case set:
                 // get existing set for key
@@ -498,16 +511,22 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
                     cardinalities.put(name, VertexProperty.Cardinality.list);
                 }
                 // add value to set, this will call dirty method in session only if element did not exist
-                if (set.add(property))
+                if (set.add(property)) {
+                    // notify session
                     session.dirtyVertex(this);
+                    // update flag
+                    dirty = true;
+                }
                 break;
             default:
                 // use value (single)
                 properties.put(name, Collections.singletonList(property));
                 // cardinality
                 cardinalities.put(name, VertexProperty.Cardinality.single);
-                // set vertex as dirty
+                // notify session
                 session.dirtyVertex(this);
+                // update flag
+                dirty = true;
                 break;
         }
         // return property

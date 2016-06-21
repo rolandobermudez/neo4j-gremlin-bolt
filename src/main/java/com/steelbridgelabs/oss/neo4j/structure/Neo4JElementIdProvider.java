@@ -19,6 +19,10 @@
 
 package com.steelbridgelabs.oss.neo4j.structure;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public interface Neo4JElementIdProvider<T> {
 
     String idFieldName();

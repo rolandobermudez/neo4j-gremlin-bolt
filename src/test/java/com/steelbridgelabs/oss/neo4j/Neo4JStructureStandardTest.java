@@ -25,6 +25,10 @@ import org.apache.tinkerpop.gremlin.GraphProviderClass;
 import org.apache.tinkerpop.gremlin.structure.StructureStandardSuite;
 import org.junit.runner.RunWith;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 @RunWith(StructureStandardSuite.class)
 @GraphProviderClass(provider = Neo4JTestGraphProvider.class, graph = Neo4JGraph.class)
 public class Neo4JStructureStandardTest {

@@ -26,6 +26,10 @@ import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public class Neo4JGraphFactory {
 
     public static Graph open(Configuration configuration) {

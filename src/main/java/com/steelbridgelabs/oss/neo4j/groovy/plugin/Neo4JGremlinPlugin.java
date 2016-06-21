@@ -29,6 +29,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public class Neo4JGremlinPlugin extends AbstractGremlinPlugin {
 
     private static String NAME = "tinkerpop.neo4j.bolt";

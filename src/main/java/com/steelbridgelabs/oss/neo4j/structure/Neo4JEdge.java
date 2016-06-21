@@ -44,6 +44,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * @author Rogelio J. Baucells
+ */
 public class Neo4JEdge extends Neo4JElement implements Edge {
 
     private class Neo4JEdgeProperty<T> implements Property<T> {
@@ -94,6 +97,8 @@ public class Neo4JEdge extends Neo4JElement implements Edge {
     private final String label;
     private final Neo4JVertex out;
     private final Neo4JVertex in;
+
+    private boolean dirty = false;
 
     Neo4JEdge(Neo4JGraph graph, Neo4JSession session, String idFieldName, Object id, String label, Neo4JVertex out, Neo4JVertex in) {
         Objects.requireNonNull(graph, "graph cannot be null");
@@ -168,6 +173,11 @@ public class Neo4JEdge extends Neo4JElement implements Edge {
     }
 
     @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
     public <V> Property<V> property(String name, V value) {
         ElementHelper.validateProperty(name, value);
         // property value for key
@@ -176,6 +186,8 @@ public class Neo4JEdge extends Neo4JElement implements Edge {
         properties.put(name, propertyValue);
         // set edge as dirty
         session.dirtyEdge(this);
+        // update flag
+        dirty = true;
         // return property
         return propertyValue;
     }

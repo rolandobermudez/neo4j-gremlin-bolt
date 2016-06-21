@@ -37,6 +37,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
 @GraphFactoryClass(Neo4JGraphFactory.class)

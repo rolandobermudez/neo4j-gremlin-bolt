@@ -24,6 +24,10 @@ import org.apache.commons.configuration.Configuration;
 
 import java.util.Objects;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 public final class Neo4JGraphConfigurationBuilder {
 
     public static final String Neo4JUrlConfigurationKey = "neo4j.url";

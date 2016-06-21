@@ -51,6 +51,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 class Neo4JSession {
 
     private static final Logger logger = LoggerFactory.getLogger(Neo4JSession.class);

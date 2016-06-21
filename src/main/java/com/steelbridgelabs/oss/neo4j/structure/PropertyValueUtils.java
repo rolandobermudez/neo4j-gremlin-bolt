@@ -19,6 +19,10 @@
 
 package com.steelbridgelabs.oss.neo4j.structure;
 
+/**
+ *
+ * @author Rogelio J. Baucells
+ */
 class PropertyValueUtils {
 
     public static Object convertValueToSupportedType(Object value) {
