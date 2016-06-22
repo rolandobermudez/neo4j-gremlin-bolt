@@ -12,6 +12,3 @@ cache:
 after_success:
     - .travis/before-deploy.sh
     - .travis/deploy.sh
-env:
-    global:
-        secure: V+DY9GUdbaSUASGQnqrYDOQPau+eoBlBahkPYAQX95FzjohuRN5Ai7y/udc5oTRKm63bl33Stk3uAjBf9HFBZjuEsEHGxmj5Ig8BMQVeVPfblIi1dWviSNQ+dRZ6loHElVcPuJJOoiWDaUPM0XvkcXNpe1/S6Ymt7pOCXHBMDuPkoFwIFZaaTB3nTQIAovgU6oOwTqWuEMN9NyX/uF6wgt7iOzS+ZhSa0XBhFPB5YMBCXhnEpKg9Jb9u4KH5FuW9IPyVX02M8xBSzT9m+War7Nc0t64XXDO+HpyECwb1BfDg5sOgnBjbbifZN3l3Rb/hqJU7EIMdNPyAVyhaxeVyTqyodYcQiXlyj4Tf6/OGJ9i3iMj+7upBjVRCNv/Jfyfw0yeuWKyjyquHllZgnI++5e1KtYu35cDf19L8JI9FYi3o9MTez9EejbbukmoseTB3TQ79TVzrebCYB3zMSMBob5IZAla3Mwvhw7rBWNrByakMYqg0elWGXuG/N6f27w1EY9zA7ygz/N6r2Z8dmz1LMaMMvfiaAVio6L9Is02hMrDp/h4lcgfoOtUBykuD2L5DJZiTAjyn1/p/eqbKV3dNNIFMy4M9IWQ5BVPPse2YTXg1+ucX/IKXTwfMxekWX7o+a8YYPNgeDPS8n4gelbcPrU4mYNTHjWTwoBONhCmcuQs=
