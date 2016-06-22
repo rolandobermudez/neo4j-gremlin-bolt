@@ -34,11 +34,12 @@ import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Values;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author Rogelio J. Baucells
  */
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
@@ -187,12 +188,74 @@ public class Neo4JGraph implements Graph {
         return session.vertices(ids);
     }
 
+    public Iterator<Vertex> vertices(Statement statement) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.vertices(statement)
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
+    }
+
+    public Iterator<Vertex> vertices(String statement) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.vertices(new Statement(statement))
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
+    }
+
+    public Iterator<Vertex> vertices(String statement, Map<String, Object> parameters) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        Objects.requireNonNull(parameters, "parameters cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.vertices(new Statement(statement, parameters))
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
+    }
+
     @Override
     public Iterator<Edge> edges(Object... ids) {
         // get current session
         Neo4JSession session = currentSession();
         // find edges
         return session.edges(ids);
+    }
+
+    public Iterator<Edge> edges(Statement statement) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.edges(statement)
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
+    }
+
+    public Iterator<Edge> edges(String statement) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.edges(new Statement(statement))
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
+    }
+
+    public Iterator<Edge> edges(String statement, Map<String, Object> parameters) {
+        Objects.requireNonNull(statement, "statement cannot be null");
+        Objects.requireNonNull(parameters, "parameters cannot be null");
+        // get current session
+        Neo4JSession session = currentSession();
+        // find vertices
+        return session.edges(new Statement(statement, parameters))
+            .collect(Collectors.toCollection(LinkedList::new))
+            .iterator();
     }
 
     @Override
