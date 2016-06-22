@@ -21,7 +21,7 @@ limitations under the License.
     <parent>
         <artifactId>parent-oss</artifactId>
         <groupId>com.steelbridgelabs.oss</groupId>
-        <version>0.0.1</version>
+        <version>0.0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>neo4j-gremlin-bolt</artifactId>
@@ -138,6 +138,10 @@ limitations under the License.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
