@@ -260,6 +260,10 @@ public class Neo4JGraph implements Graph {
 
     @Override
     public Transaction tx() {
+        // open transaction if needed
+        if (!transaction.isOpen())
+            transaction.open();
+        // return transaction
         return transaction;
     }
 

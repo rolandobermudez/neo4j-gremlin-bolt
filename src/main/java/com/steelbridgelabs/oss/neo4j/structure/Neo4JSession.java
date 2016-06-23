@@ -52,7 +52,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
  * @author Rogelio J. Baucells
  */
 class Neo4JSession {
@@ -93,7 +92,7 @@ class Neo4JSession {
         Objects.requireNonNull(propertyIdProvider, "propertyIdProvider cannot be null");
         // log information
         if (logger.isDebugEnabled())
-            logger.debug("Creating session: {}", session.hashCode());
+            logger.debug("Creating session [{}]", session.hashCode());
         // store fields
         this.graph = graph;
         this.session = session;
@@ -109,6 +108,9 @@ class Neo4JSession {
         // check we have a transaction already in progress
         if (transaction != null)
             throw Transaction.Exceptions.transactionAlreadyOpen();
+        // log information
+        if (logger.isDebugEnabled())
+            logger.debug("Beginning transaction on session [{}]", session.hashCode());
         // begin transaction
         transaction = session.beginTransaction();
         // return transaction instance
@@ -496,7 +498,7 @@ class Neo4JSession {
             try {
                 // log information
                 if (logger.isDebugEnabled())
-                    logger.debug("Committing transaction on session: {}", session.hashCode());
+                    logger.debug("Committing transaction on session [{}]", session.hashCode());
                 // delete edges
                 deleteEdges();
                 // delete vertices
@@ -511,7 +513,7 @@ class Neo4JSession {
                 updateEdges();
                 // log information
                 if (logger.isDebugEnabled())
-                    logger.debug("Successfully committed transaction on session: {}", session.hashCode());
+                    logger.debug("Successfully committed transaction on session [{}]", session.hashCode());
             }
             catch (ClientException ex) {
                 // log error
@@ -541,7 +543,7 @@ class Neo4JSession {
             Statement statement = vertex.insertStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -554,7 +556,7 @@ class Neo4JSession {
             Statement statement = vertex.updateStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -567,7 +569,7 @@ class Neo4JSession {
             Statement statement = vertex.deleteStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -580,7 +582,7 @@ class Neo4JSession {
             Statement statement = edge.insertStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -593,7 +595,7 @@ class Neo4JSession {
             Statement statement = edge.updateStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -606,7 +608,7 @@ class Neo4JSession {
             Statement statement = edge.deleteStatement();
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
+                logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
             // execute statement
             transaction.run(statement);
         }
@@ -614,11 +616,19 @@ class Neo4JSession {
 
     StatementResult executeStatement(Statement statement) {
         try {
+            // check we have a transaction
+            if (transaction != null) {
+                // log information
+                if (logger.isDebugEnabled())
+                    logger.debug("Executing Cypher statement on transaction [{}]: {}", session.hashCode(), transaction.hashCode(), statement.toString());
+                // execute on transaction
+                return transaction.run(statement);
+            }
             // log information
             if (logger.isDebugEnabled())
-                logger.debug("Executing Cypher statement [{}]: {}", session.hashCode(), statement.toString());
-            // check we have a transaction
-            return transaction != null ? transaction.run(statement) : session.run(statement);
+                logger.debug("Executing Cypher statement on session [{}]: {}", session.hashCode(), statement.toString());
+            // execute on session
+            return session.run(statement);
         }
         catch (ClientException ex) {
             // log error
@@ -631,8 +641,8 @@ class Neo4JSession {
 
     public void close() {
         // log information
-        if (logger.isInfoEnabled())
-            logger.info("Closing neo4j session [{}]", session.hashCode());
+        if (logger.isDebugEnabled())
+            logger.debug("Closing neo4j session [{}]", session.hashCode());
         // close session
         session.close();
     }
@@ -643,7 +653,8 @@ class Neo4JSession {
         // check session is open
         if (session.isOpen()) {
             // log information
-            logger.error("Finalizing Neo4JSession [{}] without explicit call to close(), the code is leaking sessions!", session.hashCode());
+            if (logger.isErrorEnabled())
+                logger.error("Finalizing Neo4JSession [{}] without explicit call to close(), the code is leaking sessions!", session.hashCode());
         }
         // base implementation
         super.finalize();
