@@ -161,13 +161,16 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
     private final Map<String, VertexProperty.Cardinality> cardinalities = new HashMap<>();
     private final Set<Neo4JEdge> outEdges = new HashSet<>();
     private final Set<Neo4JEdge> inEdges = new HashSet<>();
+    private final SortedSet<String> labelsAdded = new TreeSet<>();
+    private final SortedSet<String> labelsRemoved = new TreeSet<>();
+    private final SortedSet<String> labels;
     private final String idFieldName;
     private final Object id;
 
-    private SortedSet<String> labels;
     private boolean outEdgesLoaded = false;
     private boolean inEdgesLoaded = false;
     private boolean dirty = false;
+    private SortedSet<String> matchLabels;
 
     Neo4JVertex(Graph graph, Neo4JSession session, Neo4JElementIdProvider propertyIdProvider, String idFieldName, Object id, Collection<String> labels) {
         Objects.requireNonNull(graph, "graph cannot be null");
@@ -183,6 +186,8 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
         this.idFieldName = idFieldName;
         this.id = id;
         this.labels = new TreeSet<>(labels);
+        // this is the original set of labels (used to match the vertex)
+        this.matchLabels = new TreeSet<>(labels);
     }
 
     Neo4JVertex(Graph graph, Neo4JSession session, Neo4JElementIdProvider propertyIdProvider, String idFieldName, Node node) {
@@ -199,6 +204,8 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
         // from node
         this.id = node.get(idFieldName).asObject();
         this.labels = StreamSupport.stream(node.labels().spliterator(), false).collect(Collectors.toCollection(TreeSet::new));
+        // this is the original set of labels (used to match the vertex)
+        this.matchLabels = new TreeSet<>(this.labels);
         // copy properties from node, remove idFieldName from map
         StreamSupport.stream(node.keys().spliterator(), false).filter(key -> idFieldName.compareTo(key) != 0).forEach(key -> {
             // value
@@ -234,8 +241,39 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
         return labels.stream().collect(Collectors.joining(Neo4JSession.VertexLabelDelimiter));
     }
 
-    public Set<String> labels() {
-        return Collections.unmodifiableSortedSet(labels);
+    public String[] labels() {
+        return labels.toArray(new String[labels.size()]);
+    }
+
+    public void addLabel(String label) {
+        Objects.requireNonNull(label, "label cannot be null");
+        // add label to set
+        if (labels.add(label)) {
+            // notify session
+            session.dirtyVertex(this);
+            // we need to update labels
+            labelsAdded.add(label);
+        }
+    }
+
+    public void removeLabel(String label) {
+        Objects.requireNonNull(label, "label cannot be null");
+        // remove label from set
+        if (labels.remove(label)) {
+            // check this label was previously added in this session
+            if (!labelsAdded.remove(label)) {
+                // notify session
+                session.dirtyVertex(this);
+                // we need to update labels
+                labelsRemoved.add(label);
+            }
+        }
+    }
+
+    String matchClause(String alias, String idParameterName) {
+        Objects.requireNonNull(idParameterName, "idParameterName cannot be null");
+        // generate match clause
+        return "(" + alias + ":" + processLabels(matchLabels) + "{" + idFieldName + ": {" + idParameterName + "}})";
     }
 
     @Override
@@ -667,28 +705,59 @@ public class Neo4JVertex extends Neo4JElement implements Vertex {
 
     @Override
     public Statement updateStatement() {
-        // create statement
-        String statement = String.format(Locale.US, "MERGE (v:%s{%s: {id}}) ON MATCH SET v = {vp}", processLabels(this.labels), idFieldName);
-        // parameters
-        Value parameters = Values.parameters("vp", statementParameters(), idFieldName, id);
-        // command statement
-        return new Statement(statement, parameters);
+        // check we need to issue statement (adding a label and then removing it will set the vertex as dirty in session but nothing to do)
+        if (dirty || !labelsAdded.isEmpty() || !labelsRemoved.isEmpty()) {
+            // create builder
+            StringBuilder builder = new StringBuilder();
+            // parameters
+            Map<String, Object> parameters = new HashMap<>();
+            // merge statement
+            builder.append("MERGE ").append(matchClause("v", "id"));
+            // id parameter
+            parameters.put("id", id);
+            // check vertex is dirty
+            if (dirty) {
+                // set properties
+                builder.append(" ON MATCH SET v = {vp}");
+                // update parameters
+                parameters.put("vp", statementParameters());
+            }
+            // check labels were added
+            if (!labelsAdded.isEmpty()) {
+                // add labels
+                builder.append(!dirty ? " ON MATCH SET v:" : ", v:").append(processLabels(labelsAdded));
+            }
+            // check labels were removed
+            if (!labelsRemoved.isEmpty()) {
+                // remove labels
+                builder.append("REMOVE v:").append(processLabels(labelsRemoved));
+            }
+            // command statement
+            return new Statement(builder.toString(), parameters);
+        }
+        return null;
     }
 
     @Override
     public Statement deleteStatement() {
         // create statement
-        String statement = String.format(Locale.US, "MATCH (n:%s{%s: {id}}) DETACH DELETE n", processLabels(this.labels), idFieldName);
+        String statement = "MATCH " + matchClause("v", "id") + " DETACH DELETE v";
         // parameters
-        Value parameters = Values.parameters(idFieldName, id);
+        Value parameters = Values.parameters("id", id);
         // command statement
         return new Statement(statement, parameters);
     }
 
-    static String processLabels(Set<String> labels) {
+    private static String processLabels(Set<String> labels) {
         Objects.requireNonNull(labels, "labels cannot be null");
         // process labels
         return labels.stream().map(label -> "`" + label + "`").collect(Collectors.joining(":"));
+    }
+
+    static String processLabels(String[] labels) {
+        Objects.requireNonNull(labels, "labels cannot be null");
+        // process labels
+        return Arrays.stream(labels).map(label -> "`" + label + "`").collect(Collectors.joining(":"));
     }
 
     @Override

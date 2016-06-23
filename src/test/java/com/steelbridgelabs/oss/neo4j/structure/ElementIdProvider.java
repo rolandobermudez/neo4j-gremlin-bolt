@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ElementIdProvider implements Neo4JElementIdProvider<Long> {
 
-    public static String IdFieldName = "id";
+    public final static String IdFieldName = "id";
 
     private final AtomicLong atomicLong = new AtomicLong();
 

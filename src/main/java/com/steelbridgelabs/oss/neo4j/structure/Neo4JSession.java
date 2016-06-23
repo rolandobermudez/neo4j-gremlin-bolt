@@ -21,6 +21,7 @@ package com.steelbridgelabs.oss.neo4j.structure;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -145,6 +146,8 @@ class Neo4JSession {
         Objects.requireNonNull(out, "out cannot be null");
         Objects.requireNonNull(in, "in cannot be null");
         Objects.requireNonNull(keyValues, "keyValues cannot be null");
+        // validate label
+        ElementHelper.validateLabel(label);
         // verify parameters are key/value pairs
         ElementHelper.legalPropertyKeyValueArray(keyValues);
         // id cannot be present
@@ -171,6 +174,8 @@ class Neo4JSession {
 
     public Iterator<Vertex> vertices(Object[] ids) {
         Objects.requireNonNull(ids, "ids cannot be null");
+        // verify identifiers
+        verifyIdentifiers(Vertex.class, ids);
         // check we have all vertices already loaded
         if (!verticesLoaded) {
             // check ids
@@ -233,6 +238,8 @@ class Neo4JSession {
 
     public Iterator<Edge> edges(Object[] ids) {
         Objects.requireNonNull(ids, "ids cannot be null");
+        // verify identifiers
+        verifyIdentifiers(Edge.class, ids);
         // check we have all edges already loaded
         if (!edgesLoaded) {
             // check ids
@@ -345,6 +352,24 @@ class Neo4JSession {
             relations.put(vertexId, edges);
         }
         edges.add(edge);
+    }
+
+    private static <T> void verifyIdentifiers(Class<T> elementClass, Object... ids) {
+        // check length
+        if (ids.length > 0) {
+            // first element in array
+            Object first = ids[0];
+            // first element class
+            Class<?> firstClass = first.getClass();
+            // check it is an element
+            if (elementClass.isAssignableFrom(firstClass)) {
+                // all ids must be of the same class
+                if (!Stream.of(ids).allMatch(id -> elementClass.isAssignableFrom(id.getClass())))
+                    throw Graph.Exceptions.idArgsMustBeEitherIdOrElement();
+            }
+            else if (!Stream.of(ids).map(Object::getClass).allMatch(firstClass::equals))
+                throw Graph.Exceptions.idArgsMustBeEitherIdOrElement();
+        }
     }
 
     private static Object processIdentifier(Object id) {
@@ -620,7 +645,7 @@ class Neo4JSession {
             if (transaction != null) {
                 // log information
                 if (logger.isDebugEnabled())
-                    logger.debug("Executing Cypher statement on transaction [{}]: {}", session.hashCode(), transaction.hashCode(), statement.toString());
+                    logger.debug("Executing Cypher statement on transaction [{}]: {}", transaction.hashCode(), statement.toString());
                 // execute on transaction
                 return transaction.run(statement);
             }

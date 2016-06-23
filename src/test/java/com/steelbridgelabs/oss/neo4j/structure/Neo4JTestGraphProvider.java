@@ -23,6 +23,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.AbstractGraphProvider;
 import org.apache.tinkerpop.gremlin.LoadGraphWith;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- *
  * @author Rogelio J. Baucells
  */
 public class Neo4JTestGraphProvider extends AbstractGraphProvider {
@@ -102,29 +102,26 @@ public class Neo4JTestGraphProvider extends AbstractGraphProvider {
     }
 
     private void createIndices(final Neo4JGraph graph, final LoadGraphWith.GraphData graphData) {
+        // default vertex label index
+        graph.execute("CREATE INDEX ON :" + Vertex.DEFAULT_LABEL + "(" + ElementIdProvider.IdFieldName + ")");
         // process graph data
         switch (graphData) {
             case GRATEFUL:
                 // create indexes
-                graph.execute("CREATE INDEX ON :artist(" + ElementIdProvider.IdFieldName + ")");
                 graph.execute("CREATE INDEX ON :artist(name)");
-                graph.execute("CREATE INDEX ON :song(" + ElementIdProvider.IdFieldName + ")");
                 graph.execute("CREATE INDEX ON :song(name)");
                 graph.execute("CREATE INDEX ON :song(songType)");
                 graph.execute("CREATE INDEX ON :song(performances)");
                 break;
             case MODERN:
                 // create indexes
-                graph.execute("CREATE INDEX ON :person(" + ElementIdProvider.IdFieldName + ")");
                 graph.execute("CREATE INDEX ON :person(name)");
                 graph.execute("CREATE INDEX ON :person(age)");
-                graph.execute("CREATE INDEX ON :software(" + ElementIdProvider.IdFieldName + ")");
                 graph.execute("CREATE INDEX ON :software(name)");
                 graph.execute("CREATE INDEX ON :software(lang)");
                 break;
             case CLASSIC:
                 // create indexes
-                graph.execute("CREATE INDEX ON :vertex(" + ElementIdProvider.IdFieldName + ")");
                 graph.execute("CREATE INDEX ON :vertex(name)");
                 graph.execute("CREATE INDEX ON :vertex(age)");
                 graph.execute("CREATE INDEX ON :vertex(lang)");

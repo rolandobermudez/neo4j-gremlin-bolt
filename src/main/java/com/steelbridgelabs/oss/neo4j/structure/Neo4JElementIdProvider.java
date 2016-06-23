@@ -20,12 +20,21 @@
 package com.steelbridgelabs.oss.neo4j.structure;
 
 /**
- *
  * @author Rogelio J. Baucells
  */
 public interface Neo4JElementIdProvider<T> {
 
+    /**
+     * Gets the field name used for identifiers in {@link Neo4JElement}.
+     *
+     * @return the field name used for identifiers.
+     */
     String idFieldName();
 
+    /**
+     * Generates a new identifier value for a {@link Neo4JElement}.
+     *
+     * @return the new identifier value.
+     */
     T generateId();
 }

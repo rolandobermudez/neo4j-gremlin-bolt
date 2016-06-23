@@ -36,7 +36,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -241,7 +240,7 @@ public class Neo4JEdge extends Neo4JElement implements Edge {
     @Override
     public Statement insertStatement() {
         // create statement
-        String statement = String.format(Locale.US, "MATCH (o:%s{%s: {oid}}), (i:%s{%s: {iid}}) CREATE (o)-[r:`%s`{ep}]->(i)", Neo4JVertex.processLabels(out.labels()), idFieldName, Neo4JVertex.processLabels(in.labels()), idFieldName, label);
+        String statement = "MATCH " + out.matchClause("o", "oid") + ", " + in.matchClause("i", "iid") + " CREATE (o)-[r:`" + label + "`{ep}]->(i)";
         // parameters
         Value parameters = Values.parameters("oid", out.id(), "iid", in.id(), "ep", statementParameters());
         // command statement
@@ -250,24 +249,20 @@ public class Neo4JEdge extends Neo4JElement implements Edge {
 
     @Override
     public Statement updateStatement() {
-        // create statement
-        String statement = String.format(Locale.US, "MATCH (o:%s{%s: {oid}}), (i:%s{%s: {iid}}) MERGE (o)-[r:`%s`{%s: {id}}]->(i) ON MATCH SET r = {rp}", Neo4JVertex.processLabels(out.labels()), idFieldName, Neo4JVertex.processLabels(in.labels()), idFieldName, label, idFieldName);
+        // update statement
+        String statement = "MATCH " + out.matchClause("o", "oid") + ", " + in.matchClause("i", "iid") + " MERGE (o)-[r:`" + label + "`{" + idFieldName + ": {id}}]->(i) ON MATCH SET r = {rp}";
         // parameters
-        Value parameters = Values.parameters("oid", out.id(), "iid", in.id(), idFieldName, id, "rp", statementParameters());
+        Value parameters = Values.parameters("oid", out.id(), "iid", in.id(), "id", id, "rp", statementParameters());
         // command statement
         return new Statement(statement, parameters);
     }
 
     @Override
     public Statement deleteStatement() {
-        // create statement
-        String statement = String.format(Locale.US, "MATCH (o:%s{%s: {oid}})-[r:`%s`{%s: {id}}]->(i:%s{%s: {iid}}) DELETE r",
-            Neo4JVertex.processLabels(out.labels()), idFieldName,
-            label,
-            idFieldName,
-            Neo4JVertex.processLabels(in.labels()), idFieldName);
+        // delete statement
+        String statement = "MATCH " + out.matchClause("o", "oid") + "-[r:`" + label + "`{" + idFieldName + ": {id}}]->" + in.matchClause("i", "iid") + " DELETE r";
         // parameters
-        Value parameters = Values.parameters("oid", out.id(), "iid", in.id(), idFieldName, id);
+        Value parameters = Values.parameters("oid", out.id(), "iid", in.id(), "id", id);
         // command statement
         return new Statement(statement, parameters);
     }
